@@ -7,11 +7,11 @@ module GemPublisher
 
     def execute(*arguments)
       cmd = Shellwords.join(arguments)
-      stdout_str, stderr_str, status = Open3.capture3(cmd)
-      if status.exitstatus > 0
-        raise Error, [stderr_str, stdout_str].join("\n").strip
+      Open3.popen3(cmd) do |_i, stdout, stderr, thr|
+        output = [stderr.read, stdout.read].join.strip
+        raise Error, output if thr.value.exitstatus > 0
+        return output
       end
-      stdout_str
     end
   end
 end
